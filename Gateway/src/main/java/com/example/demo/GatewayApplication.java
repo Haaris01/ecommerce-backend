@@ -23,7 +23,7 @@ public class GatewayApplication {
 						.uri("http://localhost:8085"))
 				.route("cart", r -> r.path("/cart/**")
 						.filters(f -> f.stripPrefix(1))
-						.uri("http://localhost:9080"))
+						.uri("http://localhost:8080"))
 				.route("order", r -> r.path("/order/**")
 						.filters(f -> f.stripPrefix(1))
 						.uri("http://localhost:8822"))

@@ -6,38 +6,56 @@ import com.productservice.model.Product;
 import com.productservice.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class ProductService {
 
     @Autowired
-    private ProductRequest productRequest;
-    @Autowired
     private ProductRepository productRepository;
-    @Autowired
-    private ProductResponse productResponse;
-    public void createProduct(ProductRequest productRequest){
+
+    public void createProduct(ProductRequest productRequest) {
         Product product = Product.builder()
                 .name(productRequest.getName())
-//                .description(productRequest.getDescription())
                 .price(productRequest.getPrice())
                 .build();
 
         productRepository.save(product);
-        log.info("Product " + product.getId() + "is created.");
+        log.info("Product {} is created.", product.getId());
     }
 
-    public List<ProductResponse> getAllProducts(){
+    public List<ProductResponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
         log.info("Product List successfully fetched");
-        return products.stream().map(this::mapToProductResponse).toList();
+        return products.stream().map(this::mapToProductResponse).collect(Collectors.toList());
+    }
+
+    public ProductResponse findProductByName(String name) {
+        Optional<Product> product = productRepository.findByName(name);
+        if (product.isEmpty()) {
+            throw new RuntimeException("Product with name " + name + " not found");
+        }
+        return mapToProductResponse(product.get());
+    }
+
+    public void updateProduct(String name, ProductRequest productRequest) {
+        Optional<Product> product = productRepository.findByName(name);
+        if (product.isEmpty()) {
+            throw new RuntimeException("Product with name " + name + " not found");
+        }
+
+        Product existingProduct = product.get();
+        existingProduct.setName(productRequest.getName());
+        existingProduct.setPrice(productRequest.getPrice());
+        existingProduct.setQuantity(productRequest.getQuantity());
+        existingProduct.setImageUrl(productRequest.getImageUrl());
+
+        productRepository.save(existingProduct);
     }
 
     private ProductResponse mapToProductResponse(Product product) {
@@ -50,29 +68,4 @@ public class ProductService {
                 .ratings(product.getRatings())
                 .build();
     }
-
-    public ProductResponse findProductByName(String name) {
-
-        Optional<Product> product = productRepository.findByName(name);
-        Product prod = product.isPresent() ? product.get() : null;
-        return ProductResponse.builder()
-                .id(prod.getId())
-                .name(prod.getName())
-                .price(prod.getPrice())
-                .quantity(prod.getQuantity())
-                .imageUrl(prod.getImageUrl())
-                .build();
-    }
-
-    public void updateProduct(String name, ProductRequest productRequest) {
-        Optional<Product> product = productRepository.findByName(name);
-        Product existingProduct = product.get();
-        System.out.println(existingProduct);
-        existingProduct.setName(productRequest.getName());
-        existingProduct.setPrice(productRequest.getPrice());
-        existingProduct.setQuantity(productRequest.getQuantity());
-        existingProduct.setImageUrl(productRequest.getImageUrl());
-        productRepository.save(existingProduct);
-    }
-
 }

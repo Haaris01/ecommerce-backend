@@ -32,6 +32,8 @@ Welcome to our e-commerce microservices application! This application is built u
     - MongoDB
 - API Gateway:
     - Spring Cloud Gateway
+- API Testing:
+    - Postman
 - Authentication:
     - JSON Web Tokens (JWT)
 - Containerization:
